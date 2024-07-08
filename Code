@@ -1,0 +1,271 @@
+from mip import Model, xsum, maximize
+
+
+def solution():
+    inc_data = input().split(";")
+
+    medication_type_number = int(inc_data[0])
+    raw_material_type_number = int(inc_data[1])
+    budget_volume = float(inc_data[2])
+    available_manual_labor_volume = float(inc_data[3])
+    available_machanized_labor_volume = float(inc_data[4])
+    warehouse_raw_materials_volume = float(inc_data[5])
+    medication_price_by_type = list(map(float, inc_data[6].split()))
+    active_substances_content = list(map(float, inc_data[7].split()))
+    available_manual_labor_cost = list(map(float, inc_data[8].split()))
+    available_machanized_labor_cost = list(map(float, inc_data[9].split()))
+    production_costs = list(map(float, inc_data[10].split()))
+    raw_material_price = list(map(float, inc_data[11].split()))
+    active_substances_content_per_raw_material_type = list(map(float, inc_data[12].split()))
+
+    model = Model()
+
+    med = [model.add_var() for k in range(medication_type_number)]
+    raw = [model.add_var() for k in range(raw_material_type_number)]
+
+    # profit maximization
+    model.objective = maximize(xsum(med[i] * medication_price_by_type[i] for i in range(
+        medication_type_number)) - xsum(med[i] * production_costs[i] for i in range(medication_type_number)) - xsum(
+        raw[j] * raw_material_price[j] for j in range(raw_material_type_number)))
+
+    # required amount of manual labor
+    model += xsum(
+        med[i] * available_manual_labor_cost[i] for i in range(medication_type_number)) <= available_manual_labor_volume
+
+    # required amount of machanized labor
+    model += xsum(med[i] * available_machanized_labor_cost[i] for i in
+                  range(medication_type_number)) <= available_machanized_labor_volume
+
+    # required amount of money
+    model += (xsum(med[i] * production_costs[i] for i in range(medication_type_number)) + xsum(
+        raw[j] * raw_material_price[j] for j in range(raw_material_type_number))) <= budget_volume
+
+    # required amount of active substance
+    model += xsum(med[i] * active_substances_content[i] for i in range(medication_type_number)) <= xsum(
+        raw[j] * active_substances_content_per_raw_material_type[j] for j in range(raw_material_type_number))
+
+    # required amount of storage space
+    model += xsum(raw[j] for j in range(raw_material_type_number)) <= warehouse_raw_materials_volume
+
+    model.verbose = 0
+
+    model.optimize()
+
+    print(model.objective_value)
+
+
+solution()
+
+############################################
+
+from mip import Model, xsum, maximize
+
+
+def solution():
+    inc_data = input().split(";")
+
+    medication_type_number = int(inc_data[0])
+    raw_material_type_number = int(inc_data[1])
+    budget_volume = float(inc_data[2])
+    available_manual_labor_volume = float(inc_data[3])
+    available_machanized_labor_volume = float(inc_data[4])
+    warehouse_raw_materials_volume = float(inc_data[5])
+    medication_price_by_type = list(map(float, inc_data[6].split()))
+    active_substances_content = list(map(float, inc_data[7].split()))
+    available_manual_labor_cost = list(map(float, inc_data[8].split()))
+    available_machanized_labor_cost = list(map(float, inc_data[9].split()))
+    production_costs = list(map(float, inc_data[10].split()))
+    raw_material_price = list(map(float, inc_data[11].split()))
+    active_substances_content_per_raw_material_type = list(map(float, inc_data[12].split()))
+    deviation_factor = list(map(float, inc_data[13].split()))
+
+    model = Model()
+
+    med = [model.add_var() for k in range(medication_type_number)]
+    raw = [model.add_var() for k in range(raw_material_type_number)]
+
+    # profit maximization
+    model.objective = maximize(xsum(med[i] * medication_price_by_type[i] for i in range(
+        medication_type_number)) - xsum(med[i] * production_costs[i] for i in range(medication_type_number)) - xsum(
+        raw[j] * raw_material_price[j] for j in range(raw_material_type_number)))
+
+    # required amount of manual labor
+    model += xsum(
+        med[i] * available_manual_labor_cost[i] for i in range(medication_type_number)) <= available_manual_labor_volume
+
+    # required amount of machanized labor
+    model += xsum(med[i] * available_machanized_labor_cost[i] for i in
+                  range(medication_type_number)) <= available_machanized_labor_volume
+
+    # required amount of money
+    model += (xsum(med[i] * production_costs[i] for i in range(medication_type_number)) + xsum(
+        raw[j] * raw_material_price[j] for j in range(raw_material_type_number))) <= budget_volume
+
+    # required amount of active substance
+    model += xsum(med[i] * active_substances_content[i] for i in range(medication_type_number)) <= xsum(
+        raw[j] * active_substances_content_per_raw_material_type[j] * (1 - deviation_factor[j]) for j in
+        range(raw_material_type_number))
+
+    # required amount of storage space
+    model += xsum(raw[j] for j in range(raw_material_type_number)) <= warehouse_raw_materials_volume
+
+    model.verbose = 0
+
+    model.optimize()
+
+    print(model.objective_value)
+
+
+solution()
+
+
+################################################
+
+from mip import Model, xsum, maximize
+
+
+def solution():
+    inc_data = input().split(";")
+
+    medication_type_number = int(inc_data[0])
+    raw_material_type_number = int(inc_data[1])
+    scenario = int(inc_data[2])
+    budget_volume = float(inc_data[3])
+    available_manual_labor_volume_scenario = list(map(float, inc_data[4].split()))
+    available_machanized_labor_volume_scenario = list(map(float, inc_data[5].split()))
+    warehouse_raw_materials_volume = float(inc_data[6])
+    medication_price_by_type = list(map(float, inc_data[7].split()))
+    active_substances_content = list(map(float, inc_data[8].split()))
+    available_manual_labor_cost = list(map(float, inc_data[9].split()))
+    available_machanized_labor_cost = list(map(float, inc_data[10].split()))
+    production_costs = list(map(float, inc_data[11].split()))
+    raw_material_price = list(map(float, inc_data[12].split()))
+    active_substances_content_per_raw_material_type = list(map(float, inc_data[13].split()))
+    deviation_factor = list(map(float, inc_data[14].split()))
+
+    model = Model()
+
+    med = [model.add_var() for k in range(medication_type_number)]
+    raw = [model.add_var() for k in range(raw_material_type_number)]
+
+    # profit maximization
+    model.objective = maximize(xsum(med[i] * medication_price_by_type[i] for i in range(
+        medication_type_number)) - xsum(med[i] * production_costs[i] for i in range(medication_type_number)) - xsum(
+        raw[j] * raw_material_price[j] for j in range(raw_material_type_number)))
+
+    # required amount of manual labor
+    model += xsum(
+        med[i] * available_manual_labor_cost[i] for i in range(medication_type_number)) <= min(
+        available_manual_labor_volume_scenario)
+
+    # required amount of machanized labor
+    model += xsum(med[i] * available_machanized_labor_cost[i] for i in
+                  range(medication_type_number)) <= min(available_machanized_labor_volume_scenario)
+
+    # required amount of money
+    model += (xsum(med[i] * production_costs[i] for i in range(medication_type_number)) + xsum(
+        raw[j] * raw_material_price[j] for j in range(raw_material_type_number))) <= budget_volume
+
+    # required amount of active substance
+    model += xsum(med[i] * active_substances_content[i] for i in range(medication_type_number)) <= xsum(
+        raw[j] * active_substances_content_per_raw_material_type[j] * (1 - deviation_factor[j]) for j in
+        range(raw_material_type_number))
+
+    # required amount of storage space
+    model += xsum(raw[j] for j in range(raw_material_type_number)) <= warehouse_raw_materials_volume
+
+    model.verbose = 0
+
+    model.optimize()
+
+    print(model.objective_value)
+
+
+solution()
+
+
+#####################################
+
+
+from mip import Model, xsum, maximize
+
+
+
+class ModelResult:
+    def __init__(self, value, prob):
+        self.value = value
+        self.prob = prob
+
+
+def solution():
+    inc_data = input().split(";")
+
+    medication_type_number = int(inc_data[0])
+    raw_material_type_number = int(inc_data[1])
+    scenario = int(inc_data[2])
+    budget_volume = float(inc_data[3])
+    scenarios_prob = list(map(float, inc_data[4].split()))
+    available_manual_labor_volume_scenario = list(map(float, inc_data[5].split()))
+    available_machanized_labor_volume_scenario = list(map(float, inc_data[6].split()))
+    warehouse_raw_materials_volume = float(inc_data[7])
+    medication_price_by_type = list(map(float, inc_data[8].split()))
+    active_substances_content = list(map(float, inc_data[9].split()))
+    available_manual_labor_cost = list(map(float, inc_data[10].split()))
+    available_machanized_labor_cost = list(map(float, inc_data[11].split()))
+    production_costs = list(map(float, inc_data[12].split()))
+    raw_material_price = list(map(float, inc_data[13].split()))
+    active_substances_content_per_raw_material_type = list(map(float, inc_data[14].split()))
+    deviation_factor = list(map(float, inc_data[15].split()))
+    
+    results = []
+    for first_scenario in range(scenario):
+        for second_scenario in range(scenario):
+            model = Model()
+            
+            med = [model.add_var() for k in range(medication_type_number)]
+            raw = [model.add_var() for k in range(raw_material_type_number)]
+
+            # profit maximization
+            model.objective = maximize(xsum(med[i] * medication_price_by_type[i] for i in range(
+                medication_type_number)) - xsum(med[i] * production_costs[i] for i in range(medication_type_number)) - xsum(
+                raw[j] * raw_material_price[j] for j in range(raw_material_type_number)))
+
+            # required amount of manual labor
+            model += xsum(
+                med[i] * available_manual_labor_cost[i] for i in range(medication_type_number)) <= \
+                available_manual_labor_volume_scenario[first_scenario]
+
+            # required amount of machanized labor
+            model += xsum(med[i] * available_machanized_labor_cost[i] for i in
+                          range(medication_type_number)) <= available_machanized_labor_volume_scenario[second_scenario]
+
+            # required amount of money
+            model += (xsum(med[i] * production_costs[i] for i in range(medication_type_number)) + xsum(
+                raw[j] * raw_material_price[j] for j in range(raw_material_type_number))) <= budget_volume
+
+            # required amount of active substance
+            model += xsum(med[i] * active_substances_content[i] for i in range(medication_type_number)) <= xsum(
+                raw[j] * active_substances_content_per_raw_material_type[j] * (1 - deviation_factor[j]) for j in
+                range(raw_material_type_number))
+
+            # required amount of storage space
+            model += xsum(raw[j] for j in range(raw_material_type_number)) <= warehouse_raw_materials_volume
+
+            model.verbose = 0
+
+            model.optimize()
+
+            result = ModelResult(model.objective_value,
+                                 scenarios_prob[first_scenario] * scenarios_prob[second_scenario])
+            results.append(result)
+
+    results.sort(reverse=True, key=lambda x: x.value)
+    total_probability = 0
+    for result in results:
+        total_probability += result.prob
+        if total_probability >= 0.5:
+            print(result.value)
+            break            
+            
+
+solution()
